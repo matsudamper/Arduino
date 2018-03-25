@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\Program Files (x86)\\Arduino\\1.8.5\\libraries\\Mouse\\src",
+                "C:\\Program Files\\WindowsApps\\ArduinoLLC.ArduinoIDE_1.8.10.0_x86__mdqgnx93n4wtt\\hardware\\arduino\\avr\\cores\\arduino",
+                "C:\\Program Files (x86)\\Arduino\\1.8.5\\hardware\\arduino\\avr\\cores\\arduino"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": false,
+                "path": [
+                    "C:\\Program Files (x86)\\Arduino\\1.8.5\\libraries\\Mouse\\src\\Mouse.h",
+                    "C:\\Program Files (x86)\\Arduino\\1.8.5\\hardware",
+                    "C:\\Program Files (x86)\\Arduino\\1.8.5\\libraries",
+                    "C:\\Program Files\\WindowsApps\\ArduinoLLC.ArduinoIDE_1.8.10.0_x86__mdqgnx93n4wtt\\hardware\\arduino\\avr\\cores\\arduino",
+                    "${workspaceRoot}",
+                    "C:\\Program Files (x86)\\Arduino\\1.8.5\\hardware\\arduino\\avr\\cores\\arduino"
+                ]
+            },
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 3
+}
