@@ -3,6 +3,7 @@
 #include "Mouse.h"
 #include "Reader.h"
 #include "kotlin.h"
+#include "DoubleGesture.h"
 
 // PIN
 const int LED_PIN_ID = 2;
@@ -11,9 +12,8 @@ const int PIN_Y = A1;
 
 // Value
 Reader *reader;
-unsigned long firstDownTime = 0;
-unsigned long secondDownTime = 0;
-unsigned long finishTime = NULL;
+DoubleGesture *xGesture;
+DoubleGesture *yGesture;
 
 char buf[40];
 
@@ -38,10 +38,6 @@ int getMove(Reader::Level level)
     }
 }
 
-boolean firstFlag = false;
-boolean secondFlag = false;
-boolean firstMode = false;
-
 void setup()
 {
     Serial.begin(9600);
@@ -49,6 +45,9 @@ void setup()
 
     reader = new Reader(PIN_X, PIN_Y);
     reader->Calibration(LED_PIN_ID);
+
+    xGesture = new DoubleGesture();
+    yGesture = new DoubleGesture();
 }
 
 void loop()
@@ -64,69 +63,19 @@ void loop()
     int yDirection = y < 0 ? -1 : 1;
 
     Reader::Level xLevel = reader->getLevel(xPar);
-    Reader::Level ylevel = reader->getLevel(yPar);
+    Reader::Level yLevel = reader->getLevel(yPar);
 
-    switch (xLevel)
-    {
-    case Reader::Level::Level_NONE:
-        firstDownTime = millis();
+    xGesture->setLevel(xLevel);
+    yGesture->setLevel(yLevel);
 
-        if (finishTime == NULL)
-        {
-            finishTime = millis();
-        }
-        else
-        {
-            if (finishTime + 200 < millis())
-            {
-                firstMode = false;
-            }
-        }
-
-        if (firstFlag)
-        {
-            if (secondFlag)
-            {
-                firstFlag = false;
-                secondFlag = false;
-            }
-            else
-            {
-                secondDownTime = millis();
-            }
-        }
-        break;
-
-    default:
-        finishTime = NULL;
-        if (firstDownTime + 500 > millis())
-        {
-            firstFlag = true;
-        }
-        else
-        {
-            firstFlag = false;
-        }
-        break;
-
-    case Reader::Level::Level_MAX:
-        finishTime = NULL;
-
-        if (firstFlag && secondDownTime + 500 > millis())
-        {
-            firstMode = true;
-        }
-        break;
-    }
-
-    if (firstMode)
+    if (xGesture->firstMode || yGesture->firstMode)
     {
         xDirection *= 5;
         yDirection *= 5;
     }
 
-    Mouse.move(getMove(reader->getLevel(xPar)) * xDirection,
-               getMove(reader->getLevel(yPar)) * yDirection,
+    Mouse.move(getMove(xLevel) * xDirection,
+               getMove(yLevel) * yDirection,
                0);
 
     delay(50);
