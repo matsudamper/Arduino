@@ -3,13 +3,19 @@
 #include "Reader.h"
 #include "kotlin.h"
 
-Reader::Reader(const int PIN_ID_X, const int PIN_ID_Y)
+Reader::Reader(const int PIN_ID_X, const int PIN_ID_Y, const int PIN_ID_SCROLL, const int PIN_ID_LEFT, const int PIN_ID_RIGHT)
 {
     pinMode(PIN_ID_X, INPUT_PULLUP);
     pinMode(PIN_ID_Y, INPUT_PULLUP);
+    pinMode(PIN_ID_SCROLL, INPUT_PULLUP);
+    pinMode(PIN_ID_LEFT, INPUT_PULLUP);
+    pinMode(PIN_ID_RIGHT, INPUT_PULLUP);
 
     this->PIN_ID_X = PIN_ID_X;
     this->PIN_ID_Y = PIN_ID_Y;
+    this->PIN_ID_SCROLL = PIN_ID_SCROLL;
+    this->PIN_ID_LEFT = PIN_ID_LEFT;
+    this->PIN_ID_RIGHT = PIN_ID_RIGHT;
 
     HOME_X = readX();
     HOME_Y = readY();
@@ -18,6 +24,9 @@ Reader::Reader(const int PIN_ID_X, const int PIN_ID_Y)
 int Reader::led(int LED_PIN_ID, boolean value) { digitalWrite(LED_PIN_ID, value ? HIGH : LOW); }
 Reader::readX() { return analogRead(PIN_ID_X) - HOME_X; }
 Reader::readY() { return analogRead(PIN_ID_Y) - HOME_Y; }
+boolean Reader::isScroll() { return digitalRead(PIN_ID_SCROLL) == false; }
+boolean Reader::isLeftClick(){ return digitalRead(PIN_ID_LEFT) == false; }
+boolean Reader::isRightClick(){ return digitalRead(PIN_ID_RIGHT) == false; }
 
 float Reader::getXPar(int x) { return (float)x / (x < 0 ? MIN_X : MAX_X); }
 float Reader::getYPar(int y) { return (float)y / (y < 0 ? MIN_Y : MAX_Y); }
@@ -50,11 +59,11 @@ Reader::Level Reader::getLevel(float par)
 {
     when(par)
     {
-        until(0, 0.15)
+        until(0, 0.2)
         {
             return Level::Level_NONE;
         }
-        until(0.15, 0.5)
+        until(0.2, 0.5)
         {
             return Level::Level_ONE;
         }

@@ -3,21 +3,26 @@
 #include "Mouse.h"
 #include "Reader.h"
 #include "kotlin.h"
-#include "DoubleGesture.h"
 
 // PIN
 const int LED_PIN_ID = 2;
 const int PIN_X = A2;
 const int PIN_Y = A1;
+const int PIN_SCROLL = 3;
+const int PIN_LEFT = 4;
+const int PIN_RIGHT = 5;
 
-// Value
 Reader *reader;
-DoubleGesture *xGesture;
-DoubleGesture *yGesture;
+unsigned long before = 0;
+
+bool beforeLeftState = false;
+bool beforeRightState = false;
+unsigned long beforeLeftClickTime = NULL;
+unsigned long beforeRightClickTime = NULL;
 
 char buf[40];
 
-int getMove(Reader::Level level)
+float getMove(Reader::Level level)
 {
     switch (level)
     {
@@ -43,15 +48,16 @@ void setup()
     Serial.begin(9600);
     Mouse.begin();
 
-    reader = new Reader(PIN_X, PIN_Y);
+    reader = new Reader(PIN_X, PIN_Y, PIN_SCROLL, PIN_LEFT, PIN_RIGHT);
     reader->Calibration(LED_PIN_ID);
 
-    xGesture = new DoubleGesture();
-    yGesture = new DoubleGesture();
+    before = millis();
 }
 
 void loop()
 {
+    unsigned long diff = millis() - before;
+    before = millis();
 
     int x = reader->readX();
     int y = reader->readY();
@@ -64,19 +70,63 @@ void loop()
 
     Reader::Level xLevel = reader->getLevel(xPar);
     Reader::Level yLevel = reader->getLevel(yPar);
+    float moveX = getMove(xLevel);
+    float moveY = getMove(yLevel);
 
-    xGesture->setLevel(xLevel);
-    yGesture->setLevel(yLevel);
-
-    if (xGesture->firstMode || yGesture->firstMode)
+    // Button
+    if (reader->isLeftClick())
     {
-        xDirection *= 5;
-        yDirection *= 5;
+        if (Mouse.isPressed(MOUSE_LEFT) == false)
+            Mouse.press(MOUSE_LEFT);
+    }
+    else
+    {
+        if (Mouse.isPressed(MOUSE_LEFT))
+            Mouse.release(MOUSE_LEFT);
     }
 
-    Mouse.move(getMove(xLevel) * xDirection,
-               getMove(yLevel) * yDirection,
-               0);
+    if (reader->isRightClick())
+    {
+        if (beforeRightState == false)
+            beforeRightClickTime = millis();
+    }
+    else
+    {
+        if (beforeRightClickTime != NULL)
+        {
+            if (millis() - beforeRightClickTime < 150)
+            {
+                Mouse.click(MOUSE_RIGHT);
+            }
+            beforeRightClickTime = NULL;
+        }
+    }
 
-    delay(50);
+    beforeLeftState = reader->isLeftClick();
+    beforeRightState = reader->isRightClick();
+
+    // Cursor
+    if (reader->isScroll())
+    {
+        long speed = (reader->isRightClick() ? 0.03 : 0.01) * diff;
+
+        if (xPar < yPar)
+        {
+            Mouse.move(0, 0, yDirection * -1 * speed * moveY, 0);
+        }
+        else
+        {
+            Mouse.move(0, 0, 0, xDirection * speed * moveX);
+        }
+        delay(150);
+    }
+    else
+    {
+        long speed = (reader->isRightClick() ? 0.2 : 0.05) * diff;
+        Mouse.move(moveX * xDirection * speed,
+                   moveY * yDirection * speed,
+                   0, 0);
+
+        delay(50);
+    }
 }

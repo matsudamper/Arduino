@@ -3,7 +3,7 @@
 class Reader
 {
 public:
-  Reader(int PIN_ID_X, int PIN_ID_Y);
+  Reader(int PIN_ID_X, int PIN_ID_Y, int PIN_ID_SCROLL, int PIN_ID_LEFT, int PIN_ID_RIGHT);
   enum class Level
   {
     Level_NONE,
@@ -19,12 +19,18 @@ public:
 
   int readX();
   int readY();
+  boolean isScroll();
+  boolean isLeftClick();
+  boolean isRightClick();
   float getXPar(int x);
   float getYPar(int y);
 
 private:
   int PIN_ID_X;
   int PIN_ID_Y;
+  int PIN_ID_SCROLL;
+  int PIN_ID_LEFT;
+  int PIN_ID_RIGHT;
 
   int HOME_X = 0;
   int HOME_Y = 0;
