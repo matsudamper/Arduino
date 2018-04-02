@@ -87,14 +87,14 @@ void loop()
 
     if (reader->isRightClick())
     {
-        if (beforeRightState == false)
+        if (beforeRightState == false && max(xLevel, yLevel) == Reader::Level::Level_NONE)
             beforeRightClickTime = millis();
     }
     else
     {
         if (beforeRightClickTime != NULL)
         {
-            if (millis() - beforeRightClickTime < 150)
+            if (millis() - beforeRightClickTime < 200)
             {
                 Mouse.click(MOUSE_RIGHT);
             }
